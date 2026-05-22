@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<title>Dashboard Top Bar</title>
+<script src="https://cdn.jsdelivr.net/gh/tableau/extensions-api/lib/tableau.extensions.1.latest.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+/* ════════════════════════════════
+   TOKENS
+════════════════════════════════ */
+:root{
+  --red:       #c8102e;
+  --red-dark:  #a00d24;
+  --red-glow:  rgba(200,16,46,.12);
+  --gold:      #e6a817;
+  --text:      #0f1c2e;
+  --text-mid:  #4a5568;
+  --text-soft: #8a96a8;
+  --bdr:       rgba(15,28,46,.08);
+  --bdr-mid:   rgba(15,28,46,.12);
+  --bg:        #ffffff;
+  --surf:      #f7f9fb;
+  --h-nav:     56px;
+  --ease:      cubic-bezier(.16,1,.3,1);
+  --font:      'Outfit',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{
+  width:100%;height:100%;
+  overflow:visible;
+  font-family:var(--font);
+  background:transparent;
+  -webkit-font-smoothing:antialiased;
+  color:var(--text);
+}
+
+/* ════════════════════════════════
+   NAVBAR
+════════════════════════════════ */
+.navbar{
+  position:relative;
+  width:100%;height:var(--h-nav);
+  background:var(--bg);
+  border-bottom:1px solid var(--bdr-mid);
+  box-shadow:0 2px 10px rgba(15,28,46,.07),0 1px 0 rgba(15,28,46,.04);
+  display:flex;align-items:center;
+  padding:0 16px 0 12px;
+  gap:0;z-index:100;
+  animation:fadeSlide .3s var(--ease) both;
+}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+
+/* top accent stripe */
+.navbar::before{
+  content:'';position:absolute;inset:0 0 auto 0;
+  height:3px;
+  background:linear-gradient(90deg,var(--red) 0%,#e8364f 45%,var(--gold) 100%);
+}
+
+/* ── LOGO ── */
+.logo-wrap{
+  display:flex;align-items:center;
+  flex-shrink:0;padding-right:14px;
+  border-right:1px solid var(--bdr-mid);
+  height:36px;
+}
+.logo-img{
+  height:28px;width:auto;display:block;
+  mix-blend-mode:multiply;
+  filter:contrast(1.08) saturate(1.1);
+}
+.logo-fb{
+  display:none;font-size:14px;font-weight:700;color:var(--red);
+}
+
+/* ── KPI HEADER ── */
+.kpi-wrap{
+  display:flex;flex-direction:column;
+  padding:0 16px;flex-shrink:0;
+}
+.kpi-label{
+  font-size:8.5px;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--text-soft);line-height:1;margin-bottom:2px;
+}
+.kpi-title{
+  font-size:13.5px;font-weight:700;
+  color:var(--text);letter-spacing:-.2px;
+  line-height:1.15;white-space:nowrap;
+  max-width:320px;overflow:hidden;text-overflow:ellipsis;
+}
+.kpi-title .kpi-mgr{color:var(--text);}
+.kpi-title .kpi-sep{color:var(--text-soft);margin:0 5px;font-weight:400;}
+.kpi-title .kpi-branch{
+  color:var(--red);font-weight:700;
+}
+.kpi-title.empty{color:var(--text-soft);font-weight:400;font-size:12px;}
+
+/* ── VDIV ── */
+.vdiv{width:1px;height:28px;background:var(--bdr-mid);flex-shrink:0;margin:0 6px;}
+
+/* ── NAV LINKS ── */
+.nav-links{
+  display:flex;align-items:center;gap:2px;
+  padding:0 8px;height:100%;
+}
+.nav-btn{
+  position:relative;
+  display:flex;align-items:center;gap:5px;
+  height:32px;padding:0 11px;
+  border-radius:8px;
+  font-size:12.5px;font-weight:500;
+  color:var(--text-mid);
+  cursor:pointer;border:none;background:none;
+  font-family:var(--font);letter-spacing:-.1px;
+  user-select:none;white-space:nowrap;
+  transition:background .15s,color .15s;
+}
+.nav-btn svg{width:13px;height:13px;opacity:.6;transition:opacity .15s;flex-shrink:0;}
+.nav-btn:hover{background:rgba(15,28,46,.05);color:var(--text);}
+.nav-btn:hover svg{opacity:1;}
+.nav-btn.active{color:var(--red);font-weight:600;background:var(--red-glow);}
+.nav-btn.active svg{opacity:1;color:var(--red);}
+.nav-btn.active::after{
+  content:'';
+  position:absolute;bottom:-1px;left:10px;right:10px;
+  height:2px;background:var(--red);border-radius:2px 2px 0 0;
+}
+
+/* ── FILTER TRIGGER ── */
+.filter-zone{display:flex;align-items:center;gap:8px;padding:0 8px;flex-shrink:0;}
+.filter-btn{
+  display:flex;align-items:center;gap:6px;
+  height:30px;padding:0 12px;
+  border-radius:8px;
+  font-size:12px;font-weight:500;
+  color:var(--text-mid);cursor:pointer;
+  border:1px solid var(--bdr-mid);
+  background:rgba(255,255,255,.6);
+  font-family:var(--font);
+  transition:all .18s;white-space:nowrap;user-select:none;
+  flex-shrink:0;
+}
+.filter-btn:hover{background:rgba(255,255,255,.9);border-color:rgba(15,28,46,.2);color:var(--text);}
+.filter-btn.open{background:var(--red-glow);border-color:rgba(200,16,46,.3);color:var(--red);}
+.filter-btn svg{width:13px;height:13px;transition:transform .25s var(--ease);}
+.filter-btn.open .chevron{transform:rotate(180deg);}
+.f-dot{width:6px;height:6px;border-radius:50%;background:var(--red);display:none;flex-shrink:0;}
+.filter-btn.has-filter .f-dot{display:block;}
+
+/* active chip */
+.filter-chip{
+  display:none;align-items:center;gap:5px;
+  height:26px;padding:0 8px 0 10px;
+  border-radius:20px;
+  background:var(--red-glow);
+  border:1px solid rgba(200,16,46,.2);
+  font-size:11px;font-weight:600;color:var(--red);
+  white-space:nowrap;max-width:170px;
+  overflow:hidden;text-overflow:ellipsis;
+}
+.filter-chip.visible{display:flex;}
+.chip-x{
+  width:14px;height:14px;border-radius:50%;
+  background:rgba(200,16,46,.12);border:none;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:var(--red);font-weight:700;
+  flex-shrink:0;font-family:var(--font);transition:background .14s;
+}
+.chip-x:hover{background:rgba(200,16,46,.28);}
+
+/* ── SPACER ── */
+.spacer{flex:1;}
+
+/* ── CLOCK ── */
+.clock-wrap{
+  display:flex;flex-direction:column;align-items:flex-end;
+  flex-shrink:0;
+}
+.clock-time{
+  font-size:13px;font-weight:600;color:var(--text);
+  font-variant-numeric:tabular-nums;letter-spacing:-.2px;line-height:1;
+}
+.clock-date{font-size:9px;color:var(--text-soft);letter-spacing:.2px;margin-top:2px;}
+
+/* ════════════════════════════════
+   FILTER PANEL
+════════════════════════════════ */
+.filter-panel{
+  position:absolute;
+  top:var(--h-nav);left:0;right:0;
+  background:#fff;
+  border:1px solid rgba(15,28,46,.09);
+  border-top:none;
+  border-radius:0 0 14px 14px;
+  box-shadow:0 10px 28px rgba(15,28,46,.1);
+  padding:0;overflow:hidden;
+  max-height:0;opacity:0;pointer-events:none;
+  transform:translateY(-8px);
+  transition:max-height .38s var(--ease),opacity .28s var(--ease),transform .3s var(--ease);
+  z-index:99;
+}
+.filter-panel.open{
+  max-height:62px;opacity:1;
+  pointer-events:all;transform:translateY(0);
+}
+/* left accent bar */
+.filter-panel::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--red),var(--gold));
+  border-radius:0 0 0 14px;
+}
+
+.fp-inner{
+  padding:11px 18px 11px 20px;
+  display:flex;align-items:center;gap:0;
+}
+.fp-label{
+  font-size:10px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text-soft);white-space:nowrap;
+  margin-right:16px;flex-shrink:0;
+}
+
+/* ── DRILL STEPS ── */
+.drill-step{
+  display:flex;align-items:center;
+  opacity:0;transform:translateX(10px);
+  pointer-events:none;max-width:0;overflow:hidden;
+  transition:opacity .3s var(--ease),transform .3s var(--ease),max-width .35s var(--ease);
+}
+.drill-step.visible{
+  opacity:1;transform:translateX(0);
+  pointer-events:all;max-width:240px;
+}
+
+.drill-arrow{
+  display:flex;align-items:center;justify-content:center;
+  width:0;overflow:hidden;opacity:0;flex-shrink:0;
+  transition:width .3s var(--ease),opacity .25s;
+  color:var(--text-soft);
+}
+.drill-arrow.visible{width:26px;opacity:1;}
+.drill-arrow svg{width:13px;height:13px;}
+
+/* drill select */
+.drill-select{
+  height:30px;min-width:150px;max-width:210px;
+  padding:0 28px 0 11px;
+  border-radius:8px;border:1px solid var(--bdr-mid);
+  background:#fff;color:var(--text);
+  font-size:12.5px;font-weight:500;font-family:var(--font);
+  cursor:pointer;appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%238a96a8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 9px center;
+  transition:border-color .18s,box-shadow .18s;outline:none;
+}
+.drill-select:hover{border-color:rgba(15,28,46,.22);}
+.drill-select:focus{border-color:var(--red);box-shadow:0 0 0 3px var(--red-glow);}
+.drill-select.filled{border-color:rgba(200,16,46,.35);color:var(--red);font-weight:600;}
+
+/* drill prompt */
+.drill-prompt{
+  display:none;align-items:center;gap:7px;
+  padding:5px 12px;border-radius:8px;
+  background:rgba(200,16,46,.05);
+  border:1px dashed rgba(200,16,46,.22);
+  font-size:11.5px;font-weight:600;color:var(--text-mid);
+  cursor:pointer;white-space:nowrap;height:30px;flex-shrink:0;
+  transition:all .18s;
+}
+.drill-prompt:hover{background:var(--red-glow);border-color:rgba(200,16,46,.4);color:var(--red);}
+.drill-prompt.visible{display:flex;}
+.drill-prompt svg{width:13px;height:13px;flex-shrink:0;}
+
+/* reset */
+.reset-btn{
+  display:none;align-items:center;gap:5px;
+  height:30px;padding:0 11px;
+  border-radius:8px;border:1px solid var(--bdr-mid);
+  background:rgba(255,255,255,.6);color:var(--text-soft);
+  font-size:11.5px;font-weight:500;font-family:var(--font);
+  cursor:pointer;white-space:nowrap;
+  margin-left:10px;flex-shrink:0;
+  transition:all .18s;
+}
+.reset-btn:hover{background:#fff;color:var(--red);border-color:rgba(200,16,46,.25);}
+.reset-btn.visible{display:flex;}
+.reset-btn svg{width:12px;height:12px;}
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+
+  <!-- Logo -->
+  <div class="logo-wrap">
+    <img class="logo-img" id="logoImg"
+      src="https://www.combank.lk/assets/images/logo/newlogo.svg"
+      alt="ComBank"
+      onerror="this.style.display='none';document.getElementById('logoFb').style.display='block'"/>
+    <span class="logo-fb" id="logoFb">ComBank</span>
+  </div>
+
+  <!-- KPI Title -->
+  <div class="kpi-wrap" style="padding:0 14px;">
+    <div class="kpi-label">KPI</div>
+    <div class="kpi-title empty" id="kpiTitle">Select a manager</div>
+  </div>
+
+  <div class="vdiv"></div>
+
+  <!-- Nav links -->
+  <div class="nav-links">
+    <button class="nav-btn active" onclick="navTo('home',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </button>
+    <button class="nav-btn" onclick="navTo('limits',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Limits
+    </button>
+    <button class="nav-btn" onclick="navTo('position',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Position
+    </button>
+  </div>
+
+  <div class="vdiv"></div>
+
+  <!-- Filter zone -->
+  <div class="filter-zone">
+    <button class="filter-btn" id="filterBtn" onclick="toggleFilter()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+      <span id="filterBtnTxt">Filters</span>
+      <span class="f-dot"></span>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="filter-chip" id="filterChip">
+      <span id="chipTxt"></span>
+      <button class="chip-x" onclick="resetAll()">✕</button>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <!-- Clock -->
+  <div class="clock-wrap">
+    <div class="clock-time" id="clockTime">--:--:--</div>
+    <div class="clock-date" id="clockDate">--- -- ----</div>
+  </div>
+
+</nav>
+
+<!-- Filter Panel -->
+<div class="filter-panel" id="filterPanel">
+  <div class="fp-inner">
+    <span class="fp-label">Filter by</span>
+
+    <!-- AGM -->
+    <div class="drill-step visible" id="stepAgm">
+      <select class="drill-select" id="selAgm" onchange="onAgmChange()">
+        <option value="">— Select AGM —</option>
+      </select>
+    </div>
+
+    <div class="drill-arrow" id="arrow12">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+
+    <div class="drill-prompt" id="promptRegion" onclick="drillToRegion()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      Region
+    </div>
+
+    <!-- Region -->
+    <div class="drill-step" id="stepRegion">
+      <select class="drill-select" id="selRegion" onchange="onRegionChange()">
+        <option value="">— Select Region —</option>
+      </select>
+    </div>
+
+    <div class="drill-arrow" id="arrow23">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+
+    <div class="drill-prompt" id="promptBranch" onclick="drillToBranch()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Branch
+    </div>
+
+    <!-- Branch -->
+    <div class="drill-step" id="stepBranch">
+      <select class="drill-select" id="selBranch" onchange="onBranchChange()">
+        <option value="">— Select Branch —</option>
+      </select>
+    </div>
+
+    <button class="reset-btn" id="resetBtn" onclick="resetAll()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+      Reset
+    </button>
+  </div>
+</div>
+
+<script>
+'use strict';
+(function(){
+
+/* ── clock ── */
+function tick(){
+  var n=new Date();
+  document.getElementById('clockTime').textContent=
+    n.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+  document.getElementById('clockDate').textContent=
+    n.toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+}
+tick(); setInterval(tick,1000);
+
+/* ── nav ── */
+window.navTo=function(page,el){
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
+  el.classList.add('active');
+};
+
+/* ── state ── */
+var worksheet=null;
+var filterOpen=false;
+var regionMap={};   /* agm → [regions] */
+var branchMap={};   /* agm||region → [branches] */
+var managerMap={};  /* agm||region||branch → [managers] */
+var agms=[];
+
+var drill={agm:'',region:'',branch:'',step:0};
+
+/* ── KPI title update ── */
+function updateKpiTitle(){
+  var titleEl=document.getElementById('kpiTitle');
+  /* read manager and branch from current selection */
+  var mgr='';var brn=drill.branch||'';
+  /* try to get manager from managerMap */
+  if(drill.agm&&drill.region&&drill.branch){
+    var k=drill.agm+'||'+drill.region+'||'+drill.branch;
+    var mgrs=managerMap[k]||[];
+    mgr=mgrs.length?mgrs[0]:'';
+  }
+  if(mgr&&brn){
+    titleEl.className='kpi-title';
+    titleEl.innerHTML=
+      '<span class="kpi-mgr">'+escH(mgr)+'</span>'+
+      '<span class="kpi-sep">·</span>'+
+      '<span class="kpi-branch">'+escH(brn)+'</span>';
+  } else if(brn){
+    titleEl.className='kpi-title';
+    titleEl.innerHTML='<span class="kpi-branch">'+escH(brn)+'</span>';
+  } else if(drill.region){
+    titleEl.className='kpi-title';
+    titleEl.innerHTML='<span class="kpi-mgr">'+escH(drill.region)+'</span>';
+  } else if(drill.agm){
+    titleEl.className='kpi-title';
+    titleEl.innerHTML='<span class="kpi-mgr">'+escH(drill.agm)+'</span>';
+  } else {
+    titleEl.className='kpi-title empty';
+    titleEl.innerHTML='Select a filter';
+  }
+}
+
+/* ── populate select ── */
+function populateSel(id,vals,placeholder){
+  var sel=document.getElementById(id);
+  sel.innerHTML='<option value="">'+placeholder+'</option>';
+  vals.forEach(function(v){
+    var o=document.createElement('option');
+    o.value=v;o.textContent=v;sel.appendChild(o);
+  });
+}
+
+/* ── build hierarchy from data ── */
+function buildHierarchy(rows){
+  agms=[];regionMap={};branchMap={};managerMap={};
+  rows.forEach(function(r){
+    var a=r.agm||'',re=r.region||'',b=r.branch||'',m=r.manager||'';
+    if(a&&agms.indexOf(a)<0) agms.push(a);
+    if(a&&re){
+      if(!regionMap[a]) regionMap[a]=[];
+      if(regionMap[a].indexOf(re)<0) regionMap[a].push(re);
+    }
+    if(a&&re&&b){
+      var k1=a+'||'+re;
+      if(!branchMap[k1]) branchMap[k1]=[];
+      if(branchMap[k1].indexOf(b)<0) branchMap[k1].push(b);
+    }
+    if(a&&re&&b&&m){
+      var k2=a+'||'+re+'||'+b;
+      if(!managerMap[k2]) managerMap[k2]=[];
+      if(managerMap[k2].indexOf(m)<0) managerMap[k2].push(m);
+    }
+  });
+  agms.sort();
+  Object.values(regionMap).forEach(function(a){a.sort();});
+  Object.values(branchMap).forEach(function(a){a.sort();});
+  populateSel('selAgm',agms,'— Select AGM —');
+  updateUIState();
+}
+
+/* ── UI state machine ── */
+function $e(id){return document.getElementById(id);}
+function showEl(id,v){
+  var e=$e(id);
+  if(v) e.classList.add('visible');
+  else e.classList.remove('visible');
+}
+
+function updateUIState(){
+  var hasAgm=!!drill.agm,hasReg=!!drill.region,hasBr=!!drill.branch;
+  showEl('stepAgm',true);
+  showEl('stepRegion',drill.step>=2);
+  showEl('stepBranch',drill.step>=3);
+  showEl('arrow12',drill.step>=2);
+  showEl('arrow23',drill.step>=3);
+  $e('promptRegion').classList.toggle('visible',hasAgm&&drill.step===1);
+  $e('promptBranch').classList.toggle('visible',hasReg&&drill.step===2);
+  $e('resetBtn').classList.toggle('visible',hasAgm);
+
+  /* filter btn */
+  var fb=$e('filterBtn');
+  fb.classList.toggle('has-filter',hasAgm);
+  $e('filterBtnTxt').textContent=hasAgm?'Filtered':'Filters';
+
+  /* chip */
+  var chip=$e('filterChip');
+  var txt=$e('chipTxt');
+  if(hasBr)      {txt.textContent=drill.branch;chip.classList.add('visible');}
+  else if(hasReg){txt.textContent=drill.region;chip.classList.add('visible');}
+  else if(hasAgm){txt.textContent=drill.agm;   chip.classList.add('visible');}
+  else           {chip.classList.remove('visible');}
+
+  $e('selAgm').classList.toggle('filled',hasAgm);
+  $e('selRegion').classList.toggle('filled',hasReg);
+  $e('selBranch').classList.toggle('filled',hasBr);
+
+  updateKpiTitle();
+}
+
+/* ── filter toggle ── */
+window.toggleFilter=function(){
+  filterOpen=!filterOpen;
+  $e('filterPanel').classList.toggle('open',filterOpen);
+  $e('filterBtn').classList.toggle('open',filterOpen);
+};
+document.addEventListener('click',function(e){
+  if(!filterOpen) return;
+  if(!$e('filterPanel').contains(e.target)&&
+     !$e('filterBtn').contains(e.target)&&
+     !$e('filterChip').contains(e.target)){
+    filterOpen=false;
+    $e('filterPanel').classList.remove('open');
+    $e('filterBtn').classList.remove('open');
+  }
+});
+
+/* ── drill handlers ── */
+window.onAgmChange=function(){
+  drill.agm=$e('selAgm').value;
+  drill.region='';drill.branch='';drill.step=drill.agm?1:0;
+  populateSel('selRegion',[],'— Select Region —');
+  populateSel('selBranch',[],'— Select Branch —');
+  updateUIState();
+  setParams(drill.agm?'AGM':null, drill.agm||null, null, null);
+};
+window.drillToRegion=function(){
+  if(!drill.agm) return;
+  drill.step=2;
+  populateSel('selRegion',regionMap[drill.agm]||[],'— Select Region —');
+  updateUIState();
+};
+window.onRegionChange=function(){
+  drill.region=$e('selRegion').value;
+  drill.branch='';
+  populateSel('selBranch',[],'— Select Branch —');
+  updateUIState();
+  setParams('REGION',drill.agm||null,drill.region||null,null);
+};
+window.drillToBranch=function(){
+  if(!drill.region) return;
+  drill.step=3;
+  var k=drill.agm+'||'+drill.region;
+  populateSel('selBranch',branchMap[k]||[],'— Select Branch —');
+  updateUIState();
+};
+window.onBranchChange=function(){
+  drill.branch=$e('selBranch').value;
+  updateUIState();
+  setParams('BRANCH',drill.agm||null,drill.region||null,drill.branch||null);
+};
+window.resetAll=function(){
+  drill={agm:'',region:'',branch:'',step:0};
+  $e('selAgm').value='';$e('selRegion').value='';$e('selBranch').value='';
+  populateSel('selRegion',[],'— Select Region —');
+  populateSel('selBranch',[],'— Select Branch —');
+  updateUIState();
+  setParams(null,null,null,null);
+};
+
+/* ── Tableau parameter update ── */
+function setParams(level,agm,region,branch){
+  if(!worksheet) return;
+  try{
+    worksheet.getParametersAsync().then(function(params){
+      params.forEach(function(p){
+        var n=p.name.toLowerCase().replace(/[\s_]/g,'');
+        if(n==='agm'||n==='agmname')       p.changeValueAsync(agm||'all');
+        if(n==='regionname'||n==='region') p.changeValueAsync(region||'all');
+        if(n==='branchname'||n==='branch') p.changeValueAsync(branch||'all');
+        if(n==='level')                    p.changeValueAsync(level||'ALL');
+        if(n==='selected')                 p.changeValueAsync(branch||region||agm||'ALL');
+        if(n==='selkpi')                   p.changeValueAsync(branch||region||agm||'all');
+      });
+    });
+  }catch(e){console.warn('params:',e);}
+}
+
+/* ── escape HTML ── */
+function escH(s){
+  if(!s) return '';
+  return String(s).replace(/[&<>"]/g,function(m){
+    return m==='&'?'&amp;':m==='<'?'&lt;':m==='>'?'&gt;':'&quot;';
+  });
+}
+
+/* ── confirmed working data reader ── */
+async function getData(ws){
+  var rows=[],rdr=await ws.getSummaryDataReaderAsync(undefined,{ignoreSelection:true});
+  for(var i=0;i<rdr.pageCount;i++){
+    var pg=await rdr.getPageAsync(i);
+    pg.data.forEach(function(r){
+      var row={};
+      pg.columns.forEach(function(c,idx){row[c.fieldName]=r[idx];});
+      rows.push(row);
+    });
+  }
+  await rdr.releaseAsync();
+  return rows;
+}
+
+async function getEnc(ws){
+  var spec=await ws.getVisualSpecificationAsync(),map={};
+  if(spec.activeMarksSpecificationIndex<0) return map;
+  spec.marksSpecifications[spec.activeMarksSpecificationIndex]
+      .encodings.forEach(function(e){map[e.id]=e.field;});
+  return map;
+}
+
+function findKey(rowKeys,needle){
+  var nl=needle.toLowerCase();
+  var exact=rowKeys.find(function(k){return k.toLowerCase()===nl;});
+  if(exact) return exact;
+  return rowKeys.find(function(k){return k.toLowerCase().indexOf(nl)>=0;})||null;
+}
+
+function processRows(rows,enc){
+  if(!rows.length) return [];
+  var rk=Object.keys(rows[0]);
+
+  /* try encoding fields first, then auto-detect */
+  function encKey(id){
+    return enc[id]?enc[id].name:null;
+  }
+  var mgrKey   =encKey('manager')  ||findKey(rk,'manager')||findKey(rk,'name');
+  var branchKey=encKey('branch')   ||findKey(rk,'branch');
+  var agmKey   =encKey('agm')      ||findKey(rk,'agm');
+  var regionKey=encKey('region')   ||findKey(rk,'region');
+
+  function dvStr(row,k){
+    if(!k||!row[k]) return '';
+    var f=row[k].formattedValue;
+    return(f&&f!=='%null%'&&f!=='Null'&&f.trim()!=='')?f.trim():'';
+  }
+
+  return rows.map(function(row){
+    return {
+      manager:dvStr(row,mgrKey),
+      branch: dvStr(row,branchKey),
+      agm:    dvStr(row,agmKey),
+      region: dvStr(row,regionKey)
+    };
+  });
+}
+
+/* ── init ── */
+window.onload=tableau.extensions.initializeAsync().then(function(){
+  worksheet=tableau.extensions.worksheetContent.worksheet;
+
+  async function update(){
+    var data=await getData(worksheet);
+    var enc =await getEnc(worksheet);
+    var rows=processRows(data,enc);
+    buildHierarchy(rows);
+  }
+
+  worksheet.addEventListener(tableau.TableauEventType.SummaryDataChanged,update);
+  update();
+
+},function(err){
+  /* standalone preview mode */
+  console.warn('Standalone:',err.message||err);
+  buildHierarchy([
+    {agm:'AGM North',  region:'Northern', branch:'Jaffna Main',   manager:'K. Perera'},
+    {agm:'AGM North',  region:'Northern', branch:'Vavuniya',      manager:'S. Silva'},
+    {agm:'AGM North',  region:'Eastern',  branch:'Trincomalee',   manager:'R. Fernando'},
+    {agm:'AGM Central',region:'Central',  branch:'Kandy City',    manager:'M. Jayawardena'},
+    {agm:'AGM Central',region:'Central',  branch:'Matale',        manager:'P. Rathnayake'},
+    {agm:'AGM Central',region:'Uva',      branch:'Badulla',       manager:'D. Wickrama'},
+    {agm:'AGM South',  region:'Southern', branch:'Galle Fort',    manager:'H. Rajapaksa'},
+    {agm:'AGM South',  region:'Southern', branch:'Matara',        manager:'L. Gunawardena'},
+    {agm:'AGM West',   region:'Western',  branch:'Colombo Main',  manager:'A. Bandara'},
+    {agm:'AGM West',   region:'Western',  branch:'Colombo 03',    manager:'T. Dissanayake'},
+    {agm:'AGM West',   region:'Sabaragamuwa',branch:'Ratnapura',  manager:'N. Seneviratne'},
+  ]);
+});
+
+})();
+</script>
+</body>
+</html>
